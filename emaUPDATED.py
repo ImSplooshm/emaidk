@@ -40,10 +40,49 @@ def SLTP(symbol, type, balance, df):
     min_lot = info.volume_min
     lot_step =info.volume_step
     max_lot = info.volume_max
+from ta.momentum import RSIIndicator
+import MetaTrader5 as mt5
+import pandas as pd
+import time
 
-    stop_level = info.trade_stops_level * info.point
+def RSI(df, n):
+    rsi = RSIIndicator(df, n).rsi()
+    return rsi
 
-    sl_multiplier = 0.8
+def EMA(df, n):
+    ema = df.ewm(span=n, adjust = False).mean()
+    return ema
+
+def ATR(df, n):
+    df['h-l'] = df['high'] - df['low']
+    df['h-c'] = df['high'] - df['close'].shift().abs()
+    df['l-c'] = df['low'] - df['close'].shift().abs()
+
+    df['tr'] = df[['h-l','h-c','l-c']].max(axis=1)
+
+    atr = EMA(df['tr'], n)
+
+    return atr
+
+def DATA(symbol, n=30):
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, n)
+    df = pd.DataFrame(rates)
+    df['time'] = pd.to_datetime(df['time'], unit='s')
+    df['ema_9'] = EMA(df = df['close'], n = 9)
+    df['ema_21'] = EMA(df = df['close'], n = 21)
+    df['RSI'] = RSI(df = df['close'], n = 7)
+    return df
+
+def SLTP(symbol, type, balance, df):
+    info = mt5.symbol_info(symbol)
+    price = mt5.symbol_info_tick(symbol)
+    price = price.ask
+
+    contract_size = info.trade_contract_size
+    min_lot = info.volume_min
+    lot_step =info.volume_step
+    max_lot = info.volume_max
+
     tp_multiplier = 1.4
     risk = 0.1
 
@@ -51,8 +90,8 @@ def SLTP(symbol, type, balance, df):
 
     atr = ATR(df, 14).iloc[-1]
 
-    stop_loss_distance = max(atr * sl_multiplier, stop_level)
-    take_profit_distance = stop_loss_distance * tp_multiplier
+    stop_loss_distance = info.trade_stops_level * info.point
+    take_profit_distance = atr * tp_multiplier
 
 
     lot_size_units = risk_amount / stop_loss_distance if stop_loss_distance > 0 else 0
@@ -141,3 +180,4 @@ if __name__ == '__main__':
         timeLive += 1
         print(f'Time live: {timeLive}')
             
+
