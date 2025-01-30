@@ -113,8 +113,8 @@ def S1(df, symbol, balance):
         print('No trade')
 
 if __name__ == '__main__':
-    account = 58647600
-    password = 'DnF*6sSc'
+    account = *account number*
+    password = *account password*
     server = 'AdmiralsGroup-Demo'
 
     mt5.initialize(path="C:/Program Files/MetaTrader 5/terminal64.exe", timeout=180000)
