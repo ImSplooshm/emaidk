@@ -25,7 +25,7 @@ def ATR(df, n):
 def DATA(symbol, n=30):
     rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M1, 0, n)
     df = pd.DataFrame(rates)
-    df['time'] = pd.to_datetime(df['time'], unit='s')
+    df['ema_5'] = EMA(df = df['close'], n =  5)
     df['ema_9'] = EMA(df = df['close'], n = 9)
     df['ema_21'] = EMA(df = df['close'], n = 21)
     df['RSI'] = RSI(df = df['close'], n = 7)
@@ -41,6 +41,7 @@ def SLTP(symbol, type, balance, df):
     lot_step =info.volume_step
     max_lot = info.volume_max
 
+    sl_multiplier = 1
     tp_multiplier = 1.4
     risk = 0.1
 
@@ -48,7 +49,7 @@ def SLTP(symbol, type, balance, df):
 
     atr = ATR(df, 14).iloc[-1]
 
-    stop_loss_distance = info.trade_stops_level * info.point
+    stop_loss_distance = max(info.trade_stops_level * info.point * 1.01, atr * sl_multiplier)
     take_profit_distance = atr * tp_multiplier
 
 
@@ -92,18 +93,18 @@ def PURCHASE(symbol, type, balance, df):
     return result
 
 
-def S1(df, symbol, balance):
+def S1(df, balance, symbol):
     df = DATA(symbol)
     latest = df.iloc[-1]
     previous = df.iloc[-2]
 
-    if previous['ema_9'] < previous['ema_21'] and latest['ema_9'] > latest['ema_21'] and latest['RSI'] < 70:
+    if previous['ema_9'] < previous['ema_21'] and latest['ema_9'] > latest['ema_21'] and latest['RSI'] < 60:
         print(symbol, 'BUY')
         res = PURCHASE(symbol = symbol,
                        type = mt5.ORDER_TYPE_BUY,
                        balance = balance,
                        df = df)
-    elif previous['ema_9'] > previous['ema_21'] and latest['ema_9'] < latest['ema_21'] and latest['RSI'] > 30:
+    elif previous['ema_9'] > previous['ema_21'] and latest['ema_9'] < latest['ema_21'] and latest['RSI'] > 40:
         print(symbol, 'SELL')
         res = PURCHASE(symbol = symbol,
                        type = mt5.ORDER_TYPE_SELL,
@@ -112,14 +113,77 @@ def S1(df, symbol, balance):
     else:
         print('No trade')
 
+def S2(df, balance, symbol):
+    latest = df.iloc[-1]
+    previous = df.iloc[-2]
+
+    ema_20 = df['ema_21']
+    ema_10 = df['ema_9']
+    ema_5 = df['ema_5']
+    rsi = df['RSI']
+
+    if ema_10.iloc[-1] > ema_20.iloc[-2]:
+        c1 = latest['close'] > latest['open']
+        c2 = previous['open'] > previous['close']
+        c3 = latest['close'] > previous['open']
+        c4 = rsi.iloc[-1] > rsi.iloc[-2]
+        c5 = latest['open'] <= ema_10.iloc[-1]
+        c6 = latest['close'] < ema_5.iloc[-1]
+        c7 = ema_20.iloc[-1] > ema_20.iloc[-2]
+        if all([c1, c2, c3, c4, c5, c6, c7]):
+            print(symbol, 'BUY')
+            res = PURCHASE(symbol = symbol,
+                        type = mt5.ORDER_TYPE_BUY,
+                        balance = balance,
+                        df = df)
+            return
+        
+    elif ema_10.iloc[-1] < ema_20.iloc[-2]:
+        c1 = latest['close'] < latest['open']
+        c2 = previous['open'] < previous['close']
+        c3 = latest['close'] < previous['open']
+        c4 = rsi.iloc[-1] < rsi.iloc[-2]
+        c5 = latest['open'] >= ema_10.iloc[-1]
+        c6 = latest['close'] > ema_5.iloc[-1]
+        c7 = ema_20.iloc[-1] < ema_20.iloc[-2]
+        if all([c1, c2, c3, c4, c5, c6, c7]):
+            print(symbol, 'SELL')
+            res = PURCHASE(symbol = symbol,
+                       type = mt5.ORDER_TYPE_SELL,
+                       balance = balance,
+                       df = df)
+            return
+    
+    print('No trade')
+
+def S3(df, balance, symbol):
+    ema_9 = df['ema_9']
+    ema_5 = df['ema_5']
+
+    if ema_5.iloc[-5] - ema_5.iloc[-3] > 0 and ema_5.iloc[-3] - ema_5.iloc[-1] < 0:
+        print(symbol, 'BUY')
+        res = PURCHASE(symbol = symbol,
+                    type = mt5.ORDER_TYPE_BUY,
+                    balance = balance,
+                    df = df)
+    elif ema_5.iloc[-5] - ema_5.iloc[-3] < 0 and ema_5.iloc[-3] - ema_5.iloc[-1] > 0:
+        print(symbol, 'SELL')
+        res = PURCHASE(symbol = symbol,
+                    type = mt5.ORDER_TYPE_SELL,
+                    balance = balance,
+                    df = df)
+    else:
+        print('No trade')
+
 if __name__ == '__main__':
-    account = *account number*
-    password = *account password*
-    server = 'AdmiralsGroup-Demo'
+    account = acc number
+    password = password
+    server = server
 
     mt5.initialize(path="C:/Program Files/MetaTrader 5/terminal64.exe", timeout=180000)
 
     authorized = mt5.login(account, password, server)
+    print(mt5.last_error())  
     
     account_info = mt5.account_info()
 
@@ -132,10 +196,10 @@ if __name__ == '__main__':
         
         for ticker in stocks:
             df = DATA(ticker)
-            S1(df, ticker, balance)
+
+            S3(df, ticker, balance)
+
         print(mt5.last_error())    
         time.sleep(60)
         timeLive += 1
         print(f'Time live: {timeLive}')
-            
-
