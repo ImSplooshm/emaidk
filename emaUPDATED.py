@@ -179,9 +179,9 @@ def S4(df, symbol, balance):
     latest = df.iloc[-1]
 
     if latest['ema_50'] > latest['ema_150']:
-        c1 = df['open'].iloc[-1] < df['close'].iloc[-1]
-        c2 = df['low'].iloc[-1] < latest['ema_150']
-        c3 = df['low'] > max(df['high'].iloc[-10:-1])
+        c1 = latest['open'] < latest['close']
+        c2 = latest['low'] < latest['ema_150']
+        c3 = latest['low'] > max(df['high'].iloc[-10:-1])
         c4 = latest['RSI'] < 30
         if all([c1, c2, c3, c4]):
 
@@ -193,9 +193,9 @@ def S4(df, symbol, balance):
             return
             
     elif latest['ema_50'] < latest['ema_150']:
-        c1 = df['open'].iloc[-1] > df['close'].iloc[-1]
-        c2 = df['high'].iloc[-1] > latest['ema_150']
-        c3 = df['high'] < max(df['high'].iloc[-10:-1])
+        c1 = latest['close'] > latest['open']
+        c2 = latest['high'] > latest['ema_150']
+        c3 = latest['high'] < max(df['high'].iloc[-10:-1])
         c4 = latest['RSI'] > 70
         if all([c1, c2, c3, c4]):
 
