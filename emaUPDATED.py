@@ -73,7 +73,7 @@ def SLTP(symbol, type, balance, df):
 
 
 def PURCHASE(symbol, type, balance, df):
-    sl, tp, volume, price = SLTP(symbol, type, balance, df)
+    sl, tp, volume, price = SLTP(symbol = symbol, type = type, balance = balance, df = df)
     request = {
         'action':mt5.TRADE_ACTION_DEAL,
         'symbol':symbol,
@@ -176,13 +176,14 @@ def S3(df, balance, symbol):
         print('No trade')
 
 if __name__ == '__main__':
-    account = acc number
-    password = password
-    server = server
+    account = YOUR ACCOUNT NUMBER
+    password = YOUR ACCOUNT PASSWORD
+    server = YOUR ACCOUNT SERVER
 
     mt5.initialize(path="C:/Program Files/MetaTrader 5/terminal64.exe", timeout=180000)
 
     authorized = mt5.login(account, password, server)
+    print(authorized)
     print(mt5.last_error())  
     
     account_info = mt5.account_info()
@@ -197,9 +198,10 @@ if __name__ == '__main__':
         for ticker in stocks:
             df = DATA(ticker)
 
-            S3(df, ticker, balance)
+            S3(df = df, symbol = ticker, balance = balance)
 
         print(mt5.last_error())    
         time.sleep(60)
         timeLive += 1
         print(f'Time live: {timeLive}')
+            
