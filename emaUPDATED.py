@@ -304,9 +304,9 @@ def S5(df, symbol, balance):
     
 
 if __name__ == '__main__':
-    account = 58647600
-    password = 'DnF*6sSc'
-    server = 'AdmiralsGroup-Demo'
+    account = ACC NUMBER
+    password = ACC PASSWORD
+    server = ACC SERVER
 
     mt5.initialize(path="C:/Program Files/MetaTrader 5/terminal64.exe", timeout=180000)
 
