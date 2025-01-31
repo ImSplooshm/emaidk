@@ -114,7 +114,6 @@ def S1(df, symbol, balance):
 
     if previous['ema_9'] < previous['ema_21'] and latest['ema_9'] > latest['ema_21'] and latest['RSI'] < 70:
         print(symbol, 'BUY')
-        trade = True
         res = PURCHASE(symbol = symbol,
                     type = mt5.ORDER_TYPE_BUY,
                     balance = balance,
@@ -125,7 +124,6 @@ def S1(df, symbol, balance):
                     price = price)
     elif previous['ema_9'] > previous['ema_21'] and latest['ema_9'] < latest['ema_21'] and latest['RSI'] > 30:
         print(symbol, 'SELL')
-        trade = True
         res = PURCHASE(symbol = symbol,
                     type = mt5.ORDER_TYPE_SELL,
                     balance = balance,
@@ -156,7 +154,6 @@ def S2(df, balance, symbol):
         c7 = ema_20.iloc[-1] > ema_20.iloc[-2]
         if all([c1, c2, c3, c4, c5, c6, c7]):
             print(symbol, 'BUY')
-            trade = True
             res = PURCHASE(symbol = symbol,
                         type = mt5.ORDER_TYPE_BUY,
                         balance = balance,
@@ -193,7 +190,6 @@ def S3(df, balance, symbol):
 
     if ema_5.iloc[-5] - ema_5.iloc[-3] > 0 and ema_5.iloc[-3] - ema_5.iloc[-1] < 0:
         print(symbol, 'BUY')
-        trade = True
         res = PURCHASE(symbol = symbol,
                     type = mt5.ORDER_TYPE_BUY,
                     balance = balance,
@@ -204,7 +200,6 @@ def S3(df, balance, symbol):
                     price = price)
     elif ema_5.iloc[-5] - ema_5.iloc[-3] < 0 and ema_5.iloc[-3] - ema_5.iloc[-1] > 0:
         print(symbol, 'SELL')
-        trade = True
         res = PURCHASE(symbol = symbol,
                        type = mt5.ORDER_TYPE_SELL,
                        balance = balance,
@@ -227,7 +222,6 @@ def S4(df, symbol, balance):
         if all([c1, c2, c3, c4]):
 
             print(symbol, 'BUY')
-            trade = True
             res = PURCHASE(symbol = symbol,
                         type = mt5.ORDER_TYPE_BUY,
                         balance = balance,
@@ -245,7 +239,6 @@ def S4(df, symbol, balance):
         if all([c1, c2, c3, c4]):
 
             print(symbol, 'SELL')
-            trade = True  
             res = PURCHASE(symbol = symbol,
                         type = mt5.ORDER_TYPE_SELL,
                         balance = balance,
