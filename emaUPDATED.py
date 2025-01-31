@@ -311,15 +311,11 @@ if __name__ == '__main__':
     timeLive = 0
 
     while True:
-
         balance = account_info.balance
-        
-        trade = False
+
         for ticker in stocks:
             df = DATA(ticker)
             S5(df, ticker, balance)
-        if trade == False:
-            print('No trade taken')
         print(mt5.last_error())    
         time.sleep(60)
         timeLive += 1
